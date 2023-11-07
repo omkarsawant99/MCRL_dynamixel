@@ -8,7 +8,7 @@ import pinocchio as pin
 import numpy as np
 
 
-package_dirs = "/home/chris/Controllers/MCRL_urdf/"
+package_dirs = "./urdf/MCRL_urdf"
 urdf = package_dirs + "gazebo_touchscreen_robot_no_linear.urdf"
 pin_robot = pin.RobotWrapper.BuildFromURDF(urdf, package_dirs)
 
