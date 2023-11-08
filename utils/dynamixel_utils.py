@@ -26,6 +26,8 @@ class MotorController:
         self.packetHandler = PacketHandler(PROTOCOL_VERSION)
         self.open_port()
         self.set_baudrate()
+        # Internal parameters
+        self.min_torque = 0.0082
 
     def open_port(self):
         if self.portHandler.openPort():
@@ -66,6 +68,42 @@ class MotorController:
     def set_torque(self, dxl_id, val):
         dxl_comm_result, dxl_error = self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_MX_GOAL_TORQUE, val)
         self.check_comm_result(dxl_comm_result, dxl_error)
+    
+    def pwm_control(self, desired_torque):
+        dt_pwm = 0.001
+        period = 0.01
+
+        if desired_torque < self.min_torque:
+            # Calculate duty cycle needed to achieve the desired average torque
+            duty_cycle = desired_torque / self.min_torque
+            
+            # Calculate on and off times based on the duty cycle
+            on_time = duty_cycle * period
+            off_time = (1 - duty_cycle) * period
+
+            # Initialize a timer
+            pwm_timer = 0
+
+            # Run the PWM loop, which should be faster than the main control loop
+            while pwm_timer < period:
+                if pwm_timer < on_time:
+                    self.set_torque(1, self.convert_nm_to_motor_val(self.min_torque, 8.4))
+                else:
+                    self.set_torque(1, 0)  # Turn off the torque
+
+                # Update the timer by the increment corresponding to the PWM control frequency
+                pwm_timer += dt_pwm
+                # Wait for dt_pwm seconds before the next iteration
+                time.sleep(dt_pwm)
+
+            # Reset the PWM timer for the next cycle
+            pwm_timer = 0
+        else:
+            # If the desired torque is above the minimum, just apply it directly
+            val = self.convert_nm_to_motor_val(desired_torque, 8.4)
+            self.set_torque(1, val)
+            time.sleep(dt_pwm)
+
 
     def disable_torque(self, dxl_id):
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_MX_TORQUE_CONTROL_ENABLE, DISABLE)

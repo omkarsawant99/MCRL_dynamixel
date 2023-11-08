@@ -3,19 +3,19 @@ from models.robot_env import simulate_robot, simulate_robot_real_time
 from planners.adaptive_planner import TrajectoryPlanner
 from controllers.impedance_controller import controller
 from utils import functions as f
-from utils.dynamixel_utils import MotorController
+#from utils.dynamixel_utils import MotorController
 import pinocchio as pin
 import numpy as np
 
 
-package_dirs = "./urdf/MCRL_urdf"
+package_dirs = "./urdf/MCRL_urdf/"
 urdf = package_dirs + "gazebo_touchscreen_robot_no_linear.urdf"
 pin_robot = pin.RobotWrapper.BuildFromURDF(urdf, package_dirs)
 
 robot = RobotEnv(pin_robot)
 robot.start_visualizer()
 
-motor_control = MotorController()
+#motor_control = MotorController()
 
 if __name__ == "__main__":
     T = 5.
@@ -27,5 +27,5 @@ if __name__ == "__main__":
 
     planner = TrajectoryPlanner(X_A, X_B, T)
 
-    simulate_robot_real_time(robot, planner, controller, motor_control)
-    #simulate_robot(robot, planner, controller)
+    #simulate_robot_real_time(robot, planner, controller, motor_control)
+    simulate_robot(robot, planner, controller)

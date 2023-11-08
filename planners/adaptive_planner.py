@@ -16,12 +16,14 @@ class TrajectoryPlanner:
         self.total_distance = np.linalg.norm(X_B - X_A)
         self.V_max = 2 * self.total_distance / T
         self.direction = (X_B - X_A) / np.linalg.norm(X_B - X_A)
+        self.target_reached = 0
 
     def get_next_state(self, current_pos, current_vel, dt):
         remaining_distance = np.linalg.norm(self.X_B - current_pos)
 
-        # If very close to the target, stop.
-        if remaining_distance <= 0.01:
+        # If very close to the target, stop. When reached, lock on to the target for impedance control.
+        if remaining_distance <= 0.01 or self.target_reached:
+            self.target_reached = 1
             return self.X_B, np.array([[0.0], [0.0], [0.0]])
 
         # Desired direction based on current position

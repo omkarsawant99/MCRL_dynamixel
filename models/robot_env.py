@@ -125,17 +125,20 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     while(t <= 10):
         start_time = time.time()
         tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-        print("Controller says:", tau)
+        print("Controller says:", tau[0])
 
         ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
         dq += dt * ddq.reshape((6,1))
         q += dt*dq
+
         if t_visual == 10:
             robot.show_positions(q)
-            time.sleep(dt_visual)
-            val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
-            MotorController.set_torque(1, val)
+            MotorController.pwm_control(tau[0], )
+            #time.sleep(dt_visual)
+            #val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
+            #MotorController.set_torque(1, val)
             t_visual = 0
+        
         t_visual += 1
         t += dt
     
