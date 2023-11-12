@@ -8,11 +8,14 @@ This repository can simulate any controller with any reference trajectory for an
 This folder should house controllers that you want to test. Currently, it has a script for impedance controller.
 ### Planners
 This folders should have reference trajectories that you want the robot to follow. Current planners include -
+
 **Adaptive planner:** This planner increases velocity as the end effector moves away from the start position, maintains constant velocity in the direction of the target and 
 reduces velocity as the target is close.
 It also replans trajectory at each step making it resistant to disturbances.
-![image1](https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/8fb3d0c6-6d40-4b1d-a700-c44d3ee57314)
+![image](https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/1346d1cd-f56d-4e3c-8642-b94c4f1f5e8a)
+
 ### Robot Models
+
 This folder should have robot models defined in URDF
 
 ## Dependencies
