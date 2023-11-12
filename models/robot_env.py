@@ -93,11 +93,24 @@ def simulate_robot(robot, planner, robot_controller):
     robot.show_positions(q)
     t_visual = 0
     dt_visual = 0.01
-    tau_prev = 0
+    disturbance_active = False
+    disturbance_force = np.zeros((6,1))
     while(True):
+        # Activate disturbance at t = 1 second
+        if t > 1.0 and t < 3.0 and not disturbance_active:
+            #disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
+            disturbance_active = True
+
+        # Deactivate disturbance at t = 3 seconds
+        if t >= 3.0 and disturbance_active:
+            disturbance_force = np.zeros((6,1))
+            disturbance_active = False
+
         tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-        if np.max(np.abs(tau)) > np.max(np.abs(tau_prev)):
-            print(np.max(tau))
+
+        if disturbance_active:
+            tau += disturbance_force
+        
         ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
         dq += dt * ddq.reshape((6,1))
         q += dt*dq
@@ -107,7 +120,46 @@ def simulate_robot(robot, planner, robot_controller):
             t_visual = 0
         t_visual += 1
         t += dt
-        tau_prev = tau
+
+
+def simulate_robot_real_time_pwm(robot, planner, robot_controller, MotorController):
+    t = 0.
+    dt = 0.001
+    q = np.zeros((6,1))
+    dq = np.zeros((6,1))
+    robot.show_positions(q)
+    MotorIDs = {1: 8.4, 2: 6.0, 6: 8.4}         # ID : Max torque at 12 V
+    t_visual = 0
+    dt_visual = 0.01
+
+    
+    MotorController.enable_torque(6)
+
+    while(t <= 10):
+        start_time = time.time()
+        tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
+
+        print("Controller says:", tau[1])
+        val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
+        MotorController.set_torque(6, val)
+        
+        ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
+        dq += dt * ddq.reshape((6,1))
+        q += dt*dq
+
+        if t_visual == 10:
+            robot.show_positions(q)
+            #MotorController.pwm_control(tau[1])
+            time.sleep(dt_visual)
+            t_visual = 0
+        
+        t_visual += 1
+        t += dt
+    
+    for id in MotorIDs:
+        MotorController.disable_torque(id)
+
+    MotorController.close_port()
 
 def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     t = 0.
@@ -115,7 +167,7 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     q = np.zeros((6,1))
     dq = np.zeros((6,1))
     robot.show_positions(q)
-    MotorIDs = {1: 8.4, 2: 6.0}         # ID : Max torque at 12 V
+    MotorIDs = {1: 8.4, 2: 8.4, 3: 6.0}         # ID : Max torque at 12 V
     t_visual = 0
     dt_visual = 0.01
 
@@ -125,20 +177,19 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     while(t <= 10):
         start_time = time.time()
         tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-        print("Controller says:", tau[0])
+        print("Controller says:", tau[1])
 
         ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
         dq += dt * ddq.reshape((6,1))
         q += dt*dq
-
         if t_visual == 10:
             robot.show_positions(q)
-            MotorController.pwm_control(tau[0], )
-            #time.sleep(dt_visual)
-            #val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
-            #MotorController.set_torque(1, val)
+            time.sleep(dt_visual)
+            for id, tu in zip(MotorIDs, tau):
+                val = MotorController.convert_nm_to_motor_val(-tu, MotorIDs[id])
+                print(val)
+                MotorController.set_torque(id, val)
             t_visual = 0
-        
         t_visual += 1
         t += dt
     

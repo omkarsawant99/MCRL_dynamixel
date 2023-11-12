@@ -18,7 +18,7 @@ robot.start_visualizer()
 #motor_control = MotorController()
 
 if __name__ == "__main__":
-    T = 5.
+    T = 3.
     X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
     X_B = np.array([[0.3], [0.3], [0.3]])
     end_effector_goal2 = np.array([[0.3], [0.5],[0.9]])
@@ -29,3 +29,4 @@ if __name__ == "__main__":
 
     #simulate_robot_real_time(robot, planner, controller, motor_control)
     simulate_robot(robot, planner, controller)
+ 

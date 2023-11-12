@@ -13,8 +13,8 @@ PROTOCOL_VERSION = 1.0               # See which protocol version is used in the
 
 # Default setting
 DXL_ID     = 1                 # Dynamixel ID : 1
-BAUDRATE   = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME = '/dev/ttyUSB1'    # Check which port is being used on your controller
+BAUDRATE   = 1000000             # Dynamixel default baudrate : 57600
+DEVICENAME = '/dev/ttyUSB0'    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 TORQUE_VALUE  = 100
 ENABLE  = 1                 # Value for enabling the torque
@@ -76,6 +76,7 @@ class MotorController:
         if desired_torque < self.min_torque:
             # Calculate duty cycle needed to achieve the desired average torque
             duty_cycle = desired_torque / self.min_torque
+            print("less than min")
             
             # Calculate on and off times based on the duty cycle
             on_time = duty_cycle * period
@@ -87,9 +88,9 @@ class MotorController:
             # Run the PWM loop, which should be faster than the main control loop
             while pwm_timer < period:
                 if pwm_timer < on_time:
-                    self.set_torque(1, self.convert_nm_to_motor_val(self.min_torque, 8.4))
+                    self.set_torque(6, 1)
                 else:
-                    self.set_torque(1, 0)  # Turn off the torque
+                    self.set_torque(6, 0)  # Turn off the torque
 
                 # Update the timer by the increment corresponding to the PWM control frequency
                 pwm_timer += dt_pwm
@@ -101,7 +102,7 @@ class MotorController:
         else:
             # If the desired torque is above the minimum, just apply it directly
             val = self.convert_nm_to_motor_val(desired_torque, 8.4)
-            self.set_torque(1, val)
+            self.set_torque(6, val)
             time.sleep(dt_pwm)
 
 

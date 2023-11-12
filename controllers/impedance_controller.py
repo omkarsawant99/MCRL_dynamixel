@@ -14,7 +14,7 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     # here we will only use the D controller to inject small joint damping
     D = 0.1*np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
     D_3 = 25
-    K = 500
+    K = 800
 
     ##TODO - implement gravity compensation and impedance control
     G = robot.get_gravity(joint_positions)
