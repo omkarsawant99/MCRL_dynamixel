@@ -8,19 +8,34 @@ import pinocchio as pin
 import numpy as np
 
 
-package_dirs = "./urdf/MCRL_urdf/"
-urdf = package_dirs + "gazebo_touchscreen_robot_no_linear.urdf"
-pin_robot = pin.RobotWrapper.BuildFromURDF(urdf, package_dirs)
+# MCRL robot
+mcrl_package_dirs = "./urdf/MCRL_urdf/"
+mcrl_urdf = mcrl_package_dirs + "gazebo_touchscreen_robot_no_linear.urdf"
+mcrl_end_effector_name = "joint_tip"
+mcrl_pin_robot = pin.RobotWrapper.BuildFromURDF(mcrl_urdf, mcrl_package_dirs)
 
-robot = RobotEnv(pin_robot)
+# UR16e robot
+ur16_package_dirs = "./urdf/UR16e_urdf/"
+ur16_urdf = ur16_package_dirs + "/urdf/eSeries_UR16e_15012020_URDF_ONLY.urdf"
+ur16_end_effector_name = "Wrist3"
+ur16_pin_robot = pin.RobotWrapper.BuildFromURDF(ur16_urdf, ur16_package_dirs)
+q_neutral = np.array([0., -1.57, 0., -1.57, 0., 0.])
+
+
+robot = RobotEnv(mcrl_pin_robot, mcrl_end_effector_name)
 robot.start_visualizer()
 
 #motor_control = MotorController()
 
 if __name__ == "__main__":
-    T = 3.
+    T = 5.
+    
     X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
+    #X_A = np.array([[0],[0],[0]])
+
     X_B = np.array([[0.3], [0.3], [0.3]])
+    #X_B = np.array([[-0.4], [0.4], [0.4]])
+    
     end_effector_goal2 = np.array([[0.3], [0.5],[0.9]])
 
     robot.show_target(X_B.flatten())
@@ -29,4 +44,3 @@ if __name__ == "__main__":
 
     #simulate_robot_real_time(robot, planner, controller, motor_control)
     simulate_robot(robot, planner, controller)
- 

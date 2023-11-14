@@ -16,6 +16,10 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     D_3 = 25
     K = 800
 
+    #D = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+    #D_3 = 2500
+    #K = 50000
+
     ##TODO - implement gravity compensation and impedance control
     G = robot.get_gravity(joint_positions)
     T_ee_positions = robot.get_forward_kinematics(joint_positions)

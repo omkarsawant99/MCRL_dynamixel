@@ -7,10 +7,11 @@ import sys
 from pinocchio.visualize import MeshcatVisualizer
 
 class RobotEnv:
-    def __init__(self, pin_robot):
+    def __init__(self, pin_robot, end_effector_name):
         self.model = pin_robot.model
         self.data = pin_robot.data
         self.viz = pin.visualize.MeshcatVisualizer(pin_robot.model, pin_robot.collision_model, pin_robot.visual_model)
+        self.end_effector_name = end_effector_name
 
     def start_visualizer(self):
         try:
@@ -66,7 +67,7 @@ class RobotEnv:
     def get_forward_kinematics(self, q):
         pin.forwardKinematics(self.model, self.data, q)
         pin.updateFramePlacements(self.model, self.data)
-        end_eff_id = self.model.getFrameId("joint_tip")
+        end_eff_id = self.model.getFrameId(self.end_effector_name)
         end_eff = self.data.oMf[end_eff_id]
         T = np.hstack((end_eff.rotation, end_eff.translation.reshape(-1, 1)))
         T = np.vstack((T, np.array([[0, 0, 0, 1]])))
@@ -80,7 +81,7 @@ class RobotEnv:
         return g.reshape(-1, 1)
 
 
-def simulate_robot(robot, planner, robot_controller):
+def simulate_robot(robot, planner, robot_controller, disturbance=False):
     '''
     Simulates the robot with the given controller
     INPUT:  robot (Class RobotEnv) : Environment of the robot
@@ -98,7 +99,8 @@ def simulate_robot(robot, planner, robot_controller):
     while(True):
         # Activate disturbance at t = 1 second
         if t > 1.0 and t < 3.0 and not disturbance_active:
-            #disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
+            if disturbance:
+                disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
             disturbance_active = True
 
         # Deactivate disturbance at t = 3 seconds
