@@ -31,4 +31,8 @@ Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 
 ## Visualization
 The visualization should look like this - 
-https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/120f47b7-b841-477c-8876-71e5885d7625
+
+
+
+https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/d265cef0-e7b2-48eb-ba89-f562b1290b09
+
