@@ -3,6 +3,7 @@ import meshcat
 import numpy as np
 import time
 import sys
+import matplotlib.pyplot as plt
 
 from pinocchio.visualize import MeshcatVisualizer
 
@@ -63,6 +64,14 @@ class RobotEnv:
         J = np.vstack((J, temp))
 
         return J
+    
+    def get_end_effector_jacobian(self, q):
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.model.getFrameId(self.end_effector_name))
+        temp = J[:3, :]
+        J = np.delete(J, [0, 1, 2], axis=0)
+        J = np.vstack((J, temp))
+
+        return J
 
     def get_forward_kinematics(self, q):
         pin.forwardKinematics(self.model, self.data, q)
@@ -81,12 +90,13 @@ class RobotEnv:
         return g.reshape(-1, 1)
 
 
-def simulate_robot(robot, planner, robot_controller, disturbance=False):
+def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=False, disturbance_end_effector=False):
     '''
     Simulates the robot with the given controller
     INPUT:  robot (Class RobotEnv) : Environment of the robot
             robot_controller       : Controller function (outputs torque)
     '''
+    # Define constants
     t = 0.
     dt = 0.001
     q = np.zeros((6,1))
@@ -96,15 +106,26 @@ def simulate_robot(robot, planner, robot_controller, disturbance=False):
     dt_visual = 0.01
     disturbance_active = False
     disturbance_force = np.zeros((6,1))
+
+    # Initialize plot
+    plot = LivePlot(x_label="Time(s)", y_label="Torques", title="Joint Torques over time")
+
     while(True):
+        # Get end-effector (body jacobian) jacobian
+        J_b = robot.get_end_effector_jacobian(q)
+        
         # Activate disturbance at t = 1 second
-        if t > 1.0 and t < 3.0 and not disturbance_active:
-            if disturbance:
+        if t > 4.0 and t < 4.5 and not disturbance_active:
+            if disturbance_all_joints:
                 disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
+            if disturbance_end_effector:
+                disturbance_force = np.zeros((6, 1))
+                disturbance_force[4, :] = -0.2      # Force in z-direction of the end-effector frame
+                disturbance_force_joint_space = J_b.T @ disturbance_force       # Converting that disturbance in joint space
             disturbance_active = True
 
         # Deactivate disturbance at t = 3 seconds
-        if t >= 3.0 and disturbance_active:
+        if t >= 4.5 and disturbance_active:
             disturbance_force = np.zeros((6,1))
             disturbance_active = False
 
@@ -113,11 +134,14 @@ def simulate_robot(robot, planner, robot_controller, disturbance=False):
         if disturbance_active:
             tau += disturbance_force
         
+
+        # Update visualizer
         ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
         dq += dt * ddq.reshape((6,1))
         q += dt*dq
         if t_visual == 10:
             robot.show_positions(q)
+            plot.update_live_plot(t, tau)
             time.sleep(dt_visual)
             t_visual = 0
         t_visual += 1
@@ -199,3 +223,26 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
         MotorController.disable_torque(id)
 
     MotorController.close_port()
+
+
+class LivePlot:
+    def __init__(self, x_label, y_label, title):
+        plt.ion()
+        self.fig, self.ax = plt.subplots()
+        self.ax.set_xlabel(x_label)
+        self.ax.set_ylabel(y_label)
+        self.ax.set_title(title)
+        self.lines = [self.ax.plot([], [], label=f'Joint {i+1}')[0] for i in range(6)]
+        self.ax.legend()
+        time.sleep(2)  # Short pause to allow the plot to render
+
+    def update_live_plot(self, t, tau):
+        # Update live plot
+        for i in range(6):
+            self.lines[i].set_xdata(np.append(self.lines[i].get_xdata(), t))
+            self.lines[i].set_ydata(np.append(self.lines[i].get_ydata(), tau[i, 0]))
+
+        self.ax.relim()
+        self.ax.autoscale_view()
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()

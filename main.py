@@ -43,4 +43,4 @@ if __name__ == "__main__":
     planner = TrajectoryPlanner(X_A, X_B, T)
 
     #simulate_robot_real_time(robot, planner, controller, motor_control)
-    simulate_robot(robot, planner, controller)
+    simulate_robot(robot, planner, controller, disturbance_end_effector=True)
