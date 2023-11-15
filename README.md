@@ -29,7 +29,7 @@ Pinocchio - https://stack-of-tasks.github.io/pinocchio/download.html
 Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 
 ## Visualization
-The visualization with disturbance should look like this. The disturbance in this case is exaggerated for representation of the functionality. 
+The visualization with disturbance should look like this. It is equally applied to each joint. The disturbance in this case is exaggerated for representation of the functionality. 
 
 
 
