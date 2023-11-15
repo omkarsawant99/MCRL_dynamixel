@@ -11,7 +11,7 @@ import numpy as np
 # MCRL robot
 mcrl_package_dirs = "./urdf/MCRL_urdf/"
 mcrl_urdf = mcrl_package_dirs + "gazebo_touchscreen_robot_no_linear.urdf"
-mcrl_end_effector_name = "joint_tip"
+mcrl_end_effector_name = "link_tip"
 mcrl_pin_robot = pin.RobotWrapper.BuildFromURDF(mcrl_urdf, mcrl_package_dirs)
 
 # UR16e robot
@@ -28,7 +28,7 @@ robot.start_visualizer()
 #motor_control = MotorController()
 
 if __name__ == "__main__":
-    T = 5.
+    T = 10.
     
     X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
     #X_A = np.array([[0],[0],[0]])

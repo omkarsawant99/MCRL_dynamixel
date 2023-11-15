@@ -115,7 +115,7 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
         J_b = robot.get_end_effector_jacobian(q)
         
         # Activate disturbance at t = 1 second
-        if t > 4.0 and t < 4.5 and not disturbance_active:
+        if t > 1.5 and t < 1.7 and not disturbance_active:
             if disturbance_all_joints:
                 disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
             if disturbance_end_effector:
@@ -125,7 +125,7 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
             disturbance_active = True
 
         # Deactivate disturbance at t = 3 seconds
-        if t >= 4.5 and disturbance_active:
+        if t >= 1.7 and disturbance_active:
             disturbance_force = np.zeros((6,1))
             disturbance_active = False
 
