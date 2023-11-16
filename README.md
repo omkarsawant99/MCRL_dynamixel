@@ -38,5 +38,5 @@ This type of disturbance simulates a linear force applied to the end effector in
 
 
 ### Random disturbances at each joint
-In this case, random disturbances is equally applied to each joint. It can be activated by switching `disturbance_all_joints=False`
+In this case, random disturbances is equally applied to each joint. It can be activated by switching `disturbance_all_joints=True`
 
