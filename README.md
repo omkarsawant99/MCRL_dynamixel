@@ -29,9 +29,18 @@ Pinocchio - https://stack-of-tasks.github.io/pinocchio/download.html
 Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 
 ## Visualization
-The visualization with disturbance should look like this. It is equally applied to each joint. The disturbance in this case is exaggerated for representation of the functionality. 
+The visualization with disturbance should look as follows. We have two types of disturbances - 
 
+### Disturbance in the end effector frame
+This type of disturbance simulates a linear force applied to the end effector in the local frame.
 
+<div style="position:relative;width:fit-content;height:fit-content;">
+            <a style="position:absolute;top:20px;right:1rem;opacity:0.8;" href="https://clipchamp.com/watch/XHLmpnnQldk?utm_source=embed&utm_medium=embed&utm_campaign=watch">
+                <img loading="lazy" style="height:22px;" src="https://clipchamp.com/e.svg" alt="Made with Clipchamp" />
+            </a>
+            <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/XHLmpnnQldk/embed" width="640" height="360"></iframe>
+        </div>
 
-https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/d265cef0-e7b2-48eb-ba89-f562b1290b09
+### Random disturbances at each joint
+In this case, random disturbances is equally applied to each joint.
 
