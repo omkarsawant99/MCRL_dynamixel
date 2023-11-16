@@ -120,7 +120,7 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
                 disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
             if disturbance_end_effector:
                 disturbance_force = np.zeros((6, 1))
-                disturbance_force[4, :] = -0.2      # Force in z-direction of the end-effector frame
+                disturbance_force[4, :] = -0.2      # Force in y-direction of the end-effector frame
                 disturbance_force_joint_space = J_b.T @ disturbance_force       # Converting that disturbance in joint space
             disturbance_active = True
 

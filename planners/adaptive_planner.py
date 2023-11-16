@@ -22,7 +22,7 @@ class TrajectoryPlanner:
         remaining_distance = np.linalg.norm(self.X_B - current_pos)
 
         # If very close to the target, stop. When reached, lock on to the target for impedance control.
-        if remaining_distance <= 0.01 or self.target_reached:
+        if remaining_distance <= 0.0001 or self.target_reached:
             self.target_reached = 1
             return self.X_B, np.array([[0.0], [0.0], [0.0]])
 
