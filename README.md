@@ -32,7 +32,7 @@ Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 The visualization is done using Pinocchio-Meshcat environment. You can also introduce disturbances in the environment. 
 
 ### Disturbance in the end effector frame
-This type of disturbance simulates a linear force applied to the end effector in the local frame. It can be activated by switching `disturbance_end_effector=True`. Below is the video of how the simulation should look like -
+This type of disturbance simulates a linear force applied to the end effector in the local frame. It can be activated by switching `disturbance_end_effector=True`. Below is the video of how the simulation should look like, with disturbance at 1.5 seconds -
 
 [![Video](URL_of_Thumbnail_Image)](https://clipchamp.com/watch/XHLmpnnQldk/embed)
 
