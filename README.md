@@ -1,4 +1,4 @@
-# Robot Simulation framework
+# Manipulator Simulation framework
 ## Introduction
 Welcome to Robot Simulation framework, a versatile robotics framework designed to simulate robots with Pinocchio-Meshcat. 
 This repository can simulate any controller with any reference trajectory for any robot. You can mix-and-match any controller, trajectory and robot.
