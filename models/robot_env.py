@@ -14,6 +14,10 @@ class RobotEnv:
         self.viz = pin.visualize.MeshcatVisualizer(pin_robot.model, pin_robot.collision_model, pin_robot.visual_model)
         self.end_effector_name = end_effector_name
 
+        # Constants to make things easier
+        self.num_joints = 6
+        self.zeros_nx1 = np.zeros((num_joints, 1))
+
     def start_visualizer(self):
         try:
             self.viz.initViewer(open=True)
@@ -52,7 +56,7 @@ class RobotEnv:
         self.viz.display(q0)
 
     def show_random_positions(self):
-        q = np.random.sample([6])
+        q = np.random.sample((self.num_joints))
         self.viz.display(q)
 
     def get_spatial_jacobian(self, q):
@@ -83,11 +87,23 @@ class RobotEnv:
         return T
 
     def rnea(self, q, dq, ddq):
-        return pin.pinocchio_pywrap.rnea(self.model, self.data, q, dq, ddq).reshape((6,1))
+        return pin.pinocchio_pywrap.rnea(self.model, self.data, q, dq, ddq).reshape(-1, 1)
 
     def get_gravity(self, q):
-        g = self.rnea(q, np.zeros((6,1)), np.zeros((6,1)))
+        g = self.rnea(q, self.zeros_nx1, self.zeros_nx1)
         return g.reshape(-1, 1)
+
+    def get_coriolis(self, q, dq):
+        C = self.rnea(q, dq, self.zeros_nx1) - self.get_gravity(q)
+        return C
+
+    def get_mass_matrix(self, q, dq):
+        M = np.zeros((self.num_joints, self.num_joints))
+        for i in range(self.num_joints):
+            ddq = self.zeros_nx1
+            ddq[i] = 1
+            M[:, i] = pin.pinocchio_pywrap.rnea(self.model, self.data, q, self.zeros_nx1, ddq).reshape(-1)
+        return M
 
 
 def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=False, disturbance_end_effector=False):
