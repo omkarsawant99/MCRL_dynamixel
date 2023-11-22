@@ -36,6 +36,12 @@ This type of disturbance simulates a linear force applied to the end effector in
 
 [![Video](URL_of_Thumbnail_Image)](https://clipchamp.com/watch/XHLmpnnQldk/embed)
 
+<div style="position:relative;width:fit-content;height:fit-content;">
+            <a style="position:absolute;top:20px;right:1rem;opacity:0.8;" href="https://clipchamp.com/watch/2YGbyyBMeNm?utm_source=embed&utm_medium=embed&utm_campaign=watch">
+                <img loading="lazy" style="height:22px;" src="https://clipchamp.com/e.svg" alt="Made with Clipchamp" />
+            </a>
+            <iframe allow="autoplay;" allowfullscreen style="border:none" src="https://clipchamp.com/watch/2YGbyyBMeNm/embed" width="640" height="360"></iframe>
+</div>
 
 ### Random disturbances at each joint
 In this case, random disturbances is equally applied to each joint. It can be activated by switching `disturbance_all_joints=True`
