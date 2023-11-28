@@ -27,3 +27,6 @@ def dynamics(robot, X, u):
 # MPC controller
 def controller(robot, planner, t, joint_positions, joint_velocities):
     X = np.vstack((joint_positions, joint_velocities))
+
+    # Get entire trajectory from planner so that you can run MPC over the entire horizon. Or you can use a simple cubic trajectory 
+    # which will add another planner script

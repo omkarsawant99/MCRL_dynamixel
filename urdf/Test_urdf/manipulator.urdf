@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<robot name="manipulator" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.013444564930782195 -0.00019917888712350437 0.029555600138510045" rpy="0 0 0"/>
+      <mass value="1.1141882017236684"/>
+      <inertia ixx="0.001002" iyy="0.001184" izz="0.001721" ixy="2e-06" iyz="-1e-06" ixz="6e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="Revolute 3" type="continuous">
+    <origin xyz="0.0065 -0.000312 0.05053" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="link_1_v8_1"/>
+    <axis xyz="-0.0 -0.0 1.0"/>
+  </joint>
+
+
+  <link name="link_1_v8_1">
+    <inertial>
+      <origin xyz="-1.306744096188795e-05 0.00038445196409746664 0.03456780301495727" rpy="0 0 0"/>
+      <mass value="0.8207846070492503"/>
+      <inertia ixx="0.000515" iyy="0.000588" izz="0.000353" ixy="-1.2e-05" iyz="-2e-06" ixz="3e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0065 0.000312 -0.05053" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_1_v8_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0065 0.000312 -0.05053" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_1_v8_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="Revolute 4" type="continuous">
+    <origin xyz="-0.025737 -0.00372 0.0563" rpy="0 0 0"/>
+    <parent link="link_1_v8_1"/>
+    <child link="link_2_v2_1"/>
+    <axis xyz="-0.986777 -0.162084 -0.0"/>
+  </joint>
+
+
+  <link name="link_2_v2_1">
+    <inertial>
+      <origin xyz="0.00913085344631044 0.10510202660277757 0.07487889517040312" rpy="0 0 0"/>
+      <mass value="0.8858378858885614"/>
+      <inertia ixx="0.001514" iyy="0.000753" izz="0.001178" ixy="0.00013" iyz="-0.000644" ixz="0.000107"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.019237 0.004032 -0.10683" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.019237 0.004032 -0.10683" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_2_v2_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="Revolute 5" type="continuous">
+    <origin xyz="0.029825 0.136161 0.09444" rpy="0 0 0"/>
+    <parent link="link_2_v2_1"/>
+    <child link="link_3_v4_1"/>
+    <axis xyz="0.986777 0.162084 0.0"/>
+  </joint>
+
+
+  <link name="link_3_v4_1">
+    <inertial>
+      <origin xyz="-0.03200190971998264 0.03441649440686073 -0.031403878714688804" rpy="0 0 0"/>
+      <mass value="0.12693277007853615"/>
+      <inertia ixx="0.000117" iyy="9.1e-05" izz="0.000107" ixy="4e-06" iyz="4.4e-05" ixz="-7e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.010588 -0.132129 -0.20127" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_3_v4_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.010588 -0.132129 -0.20127" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://meshes/link_3_v4_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+</robot>

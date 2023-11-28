@@ -102,7 +102,7 @@ class RobotEnv:
         for i in range(self.num_joints):
             ddq = self.zeros_nx1
             ddq[i] = 1
-            M[:, i] = pin.pinocchio_pywrap.rnea(self.model, self.data, q, self.zeros_nx1, ddq).reshape(-1)
+            M[:, i] = pin.pinocchio_pywrap.rnea(self.model, self.data, q, self.zeros_nx1, ddq).reshape(-1) - self.get_gravity(q)
         return M
 
 

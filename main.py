@@ -21,6 +21,12 @@ ur16_end_effector_name = "Wrist3"
 ur16_pin_robot = pin.RobotWrapper.BuildFromURDF(ur16_urdf, ur16_package_dirs)
 q_neutral = np.array([0., -1.57, 0., -1.57, 0., 0.])
 
+# Test manipulator
+test_package_dirs = "./urdf/Test_urdf/"
+test_urdf = test_package_dirs + "manipulator.urdf"
+test_end_effector_name = "link_3_v4_1"
+test_pin_robot = pin.RobotWrapper.BuildFromURDF(test_urdf, test_package_dirs)
+
 
 robot = RobotEnv(mcrl_pin_robot, mcrl_end_effector_name)
 robot.start_visualizer()
