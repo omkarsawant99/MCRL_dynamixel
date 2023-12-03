@@ -23,11 +23,12 @@
   </link>
 
 
-  <joint name="Revolute 3" type="continuous">
+  <joint name="Revolute 3" type="revolute">
     <origin xyz="0.0065 -0.000312 0.05053" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="link_1_v8_1"/>
     <axis xyz="-0.0 -0.0 1.0"/>
+    <limit effort="3.1" lower="-3.141592653589793" upper="3.141592653589793" velocity="8" />
   </joint>
 
 
@@ -52,11 +53,12 @@
   </link>
 
 
-  <joint name="Revolute 4" type="continuous">
+  <joint name="Revolute 4" type="revolute">
     <origin xyz="-0.025737 -0.00372 0.0563" rpy="0 0 0"/>
     <parent link="link_1_v8_1"/>
     <child link="link_2_v2_1"/>
     <axis xyz="-0.986777 -0.162084 -0.0"/>
+    <limit effort="3.1" lower="-3.141592653589793" upper="3.141592653589793" velocity="8" />
   </joint>
 
 
@@ -81,11 +83,12 @@
   </link>
 
 
-  <joint name="Revolute 5" type="continuous">
+  <joint name="Revolute 5" type="revolute">
     <origin xyz="0.029825 0.136161 0.09444" rpy="0 0 0"/>
     <parent link="link_2_v2_1"/>
     <child link="link_3_v4_1"/>
     <axis xyz="0.986777 0.162084 0.0"/>
+    <limit effort="3.1" lower="-3.141592653589793" upper="3.141592653589793" velocity="8" />
   </joint>
 
 

@@ -28,18 +28,18 @@ test_end_effector_name = "link_3_v4_1"
 test_pin_robot = pin.RobotWrapper.BuildFromURDF(test_urdf, test_package_dirs)
 
 
-robot = RobotEnv(mcrl_pin_robot, mcrl_end_effector_name)
+robot = RobotEnv(test_pin_robot, test_end_effector_name)
 robot.start_visualizer()
 
 #motor_control = MotorController()
 
 if __name__ == "__main__":
-    T = 10.
+    T = 3.
     
-    X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
-    #X_A = np.array([[0],[0],[0]])
+    #X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
+    X_A = np.array([[0],[0],[0]])
 
-    X_B = np.array([[0.3], [0.3], [0.3]])
+    X_B = np.array([[0.1], [-0.1], [0.1]])
     #X_B = np.array([[-0.4], [0.4], [0.4]])
     
     end_effector_goal2 = np.array([[0.3], [0.5],[0.9]])

@@ -8,19 +8,21 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
         needs to return a [6,1] vector of desired torque commands
     """
 
-    desired_joint_positions = np.zeros([6,1])
-    desired_joint_velocities = np.zeros([6,1])
+    #desired_joint_positions = np.zeros([6,1])
+    #desired_joint_velocities = np.zeros([6,1])
 
+    # Parameters for MCRL
     # here we will only use the D controller to inject small joint damping
-    D = 0.1*np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+    D = 0.01*np.ones((robot.num_joints))
     D_3 = 25
     K = 800
 
+    # Parameters for UR16e
     #D = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
     #D_3 = 2500
     #K = 50000
 
-    ##TODO - implement gravity compensation and impedance control
+    # implement gravity compensation and impedance control
     G = robot.get_gravity(joint_positions)
     T_ee_positions = robot.get_forward_kinematics(joint_positions)
     ee_positions = T_ee_positions[:, [3]]
@@ -35,14 +37,13 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     T_parallel2space_originbody_wrt_space = np.append(T_parallel2space_originbody_wrt_space, [[0,0,0,1]], axis=0)
     J_space = robot.get_spatial_jacobian(joint_positions)
     J_required = f.getAdjoint(sl.inv(T_parallel2space_originbody_wrt_space)) @ J_space
+    
     J_only_translation = np.delete(J_required, [0,1,2], axis=0)
     J_t = np.transpose(J_only_translation)
 
     ee_velocities = J_only_translation @ joint_velocities
     ee_positions = p_theta_n
 
-    #ee_positions = ee_positions.reshape(-1, )
-    #ee_velocities = ee_velocities.reshape(-1, )
     # Get desired end effector positions and velocities
     desired_ee_positions, desired_ee_velocities = planner.get_next_state(ee_positions, ee_velocities, dt=0.001)
 
