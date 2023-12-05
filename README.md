@@ -1,4 +1,4 @@
-# Robot Simulation framework
+# Manipulator Simulation framework
 ## Introduction
 Welcome to Robot Simulation framework, a versatile robotics framework designed to simulate robots with Pinocchio-Meshcat. 
 This repository can simulate any controller with any reference trajectory for any robot. You can mix-and-match any controller, trajectory and robot.
@@ -28,10 +28,19 @@ Pinocchio - https://stack-of-tasks.github.io/pinocchio/download.html
 
 Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 
-## Visualization
-The visualization with disturbance should look like this. It is equally applied to each joint. The disturbance in this case is exaggerated for representation of the functionality. 
+## Visualization and Simulation
+The visualization is done using Pinocchio-Meshcat environment. You can also introduce disturbances in the environment. 
+
+### Disturbance in the end effector frame
+This type of disturbance simulates a linear force applied to the end effector in the local frame. It can be activated by switching `disturbance_end_effector=True`. Below is the video of how the simulation should look like, with disturbance at 1.5 seconds -
+
+https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/6dd150cd-9d53-4b3d-985b-351f1bf61015
 
 
 
-https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/d265cef0-e7b2-48eb-ba89-f562b1290b09
+[![Video](URL_of_Thumbnail_Image)](https://clipchamp.com/watch/XHLmpnnQldk/embed)
+
+
+### Random disturbances at each joint
+In this case, random disturbances is equally applied to each joint. It can be activated by switching `disturbance_all_joints=True`
 
