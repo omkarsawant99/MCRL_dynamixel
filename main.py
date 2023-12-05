@@ -3,7 +3,7 @@ from models.robot_env import simulate_robot, simulate_robot_real_time
 from planners.adaptive_planner import TrajectoryPlanner
 from controllers.impedance_controller import controller
 from utils import functions as f
-#from utils.dynamixel_utils import MotorController
+from utils.dynamixel_utils import MotorController
 import pinocchio as pin
 import numpy as np
 
@@ -31,7 +31,7 @@ test_pin_robot = pin.RobotWrapper.BuildFromURDF(test_urdf, test_package_dirs)
 robot = RobotEnv(test_pin_robot, test_end_effector_name)
 robot.start_visualizer()
 
-#motor_control = MotorController()
+motor_control = MotorController()
 
 if __name__ == "__main__":
     T = 3.
@@ -48,5 +48,5 @@ if __name__ == "__main__":
 
     planner = TrajectoryPlanner(X_A, X_B, T)
 
-    #simulate_robot_real_time(robot, planner, controller, motor_control)
-    simulate_robot(robot, planner, controller, disturbance_end_effector=True)
+    simulate_robot_real_time(robot, planner, controller, motor_control)
+    #simulate_robot(robot, planner, controller, disturbance_end_effector=True)
