@@ -50,7 +50,7 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     desired_ee_positions = desired_ee_positions.reshape(-1, 1)
     desired_ee_velocities = desired_ee_velocities.reshape(-1, 1)
 
-
-    desired_joint_torques = J_t @(K*(desired_ee_positions - ee_positions)+(D_3)*(desired_ee_velocities - ee_velocities)) + G - (np.diag(D) @(joint_velocities))
+    # Gravity not included for now
+    desired_joint_torques = J_t @(K*(desired_ee_positions - ee_positions)+(D_3)*(desired_ee_velocities - ee_velocities)) - (np.diag(D) @(joint_velocities))
 
     return desired_joint_torques

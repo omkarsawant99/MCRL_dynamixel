@@ -1,9 +1,9 @@
-import pinocchio as pin
-import meshcat
 import numpy as np
 import time
 import sys
 import matplotlib.pyplot as plt
+import pinocchio as pin
+import meshcat
 
 from pinocchio.visualize import MeshcatVisualizer
 
@@ -205,7 +205,6 @@ def simulate_robot_real_time_pwm(robot, planner, robot_controller, MotorControll
 
     MotorController.close_port()
 
-
 def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     t = 0.
     dt = 0.001
@@ -219,7 +218,7 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     for id in MotorIDs:
         MotorController.enable_torque(id)
 
-    while(t <= 10):
+    while(t <= 2):
         start_time = time.time()
         tau = robot_controller(robot, planner, t, q.reshape((-1,1)), dq.reshape((-1,1)))
         #print("Controller says:", tau)
@@ -234,7 +233,7 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
             for id, tu in zip(MotorIDs, tau):
                 val = MotorController.convert_nm_to_motor_val(-tu, MotorIDs[id])
                 print(val)
-                #MotorController.set_torque(id, int(val/10))
+                MotorController.set_torque(id, val)
             print("---------------")
             t_visual = 0
         t_visual += 1
@@ -245,6 +244,41 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
 
     MotorController.close_port()
 
+
+def mimic_robot(robot, MotorController):
+    t = 0.
+    dt = 0.001
+    q = np.zeros((robot.num_joints,1))
+    robot.show_positions(q)
+    MotorIDs = {1: 8.4, 2: 8.4, 3: 8.4}         # ID : Max torque at 12 V
+    t_visual = 0
+    dt_visual = 0.01
+
+    for id in MotorIDs:
+        MotorController.enable_torque(id)
+
+    while(t <= 5):
+        #print("Controller says:", tau)
+        #print("---------------------")
+
+        if t_visual == 10:
+            for i, id in enumerate(MotorIDs):
+                val = MotorController.read_pos(id)
+                q[i] = val
+                time.sleep(0.001)
+            print(q)
+            robot.show_positions(q*np.pi/180)
+            time.sleep(dt_visual)
+
+            print("---------------")
+            t_visual = 0
+        t_visual += 1
+        t += dt
+    
+    for id in MotorIDs:
+        MotorController.disable_torque(id)
+
+    MotorController.close_port()
 
 class LivePlot:
     def __init__(self, x_label, y_label, title, num_joints):

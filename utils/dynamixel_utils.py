@@ -1,12 +1,17 @@
 from dynamixel_sdk import *
 import time
-import matplotlib.pyplot as plt
+import numpy as np
 
 # Control table address
 ADDR_MX_TORQUE_ENABLE      = 24               # Control table address is different in Dynamixel model
 ADDR_MX_PRESENT_POSITION   = 36
 ADDR_MX_TORQUE_CONTROL_ENABLE = 70
 ADDR_MX_GOAL_TORQUE        = 71
+
+# Data Byte Length
+LEN_MX_GOAL_POSITION        = 4
+LEN_MX_PRESENT_POSITION     = 4
+LEN_MX_MOVING               = 1
 
 # Protocol version
 PROTOCOL_VERSION = 1.0               # See which protocol version is used in the Dynamixel
@@ -24,11 +29,13 @@ class MotorController:
     def __init__(self):
         self.portHandler = PortHandler(DEVICENAME)
         self.packetHandler = PacketHandler(PROTOCOL_VERSION)
+        #self.groupBulkRead = GroupBulkRead(self.portHandler, self.packetHandler)
         self.open_port()
         self.set_baudrate()
         # Internal parameters
         self.min_torque = 0.0082
 
+    # Initializations
     def open_port(self):
         if self.portHandler.openPort():
             print("Succeeded to open the port")
@@ -49,6 +56,7 @@ class MotorController:
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_MX_TORQUE_CONTROL_ENABLE, ENABLE)
         self.check_comm_result(dxl_comm_result, dxl_error)
 
+    # Conversions
     def convert_nm_to_motor_val(self, val_nm, max_torque_nm):
         if not 0 <= abs(val_nm) <= 0.8*max_torque_nm:
             print(val_nm)
@@ -64,7 +72,37 @@ class MotorController:
             raise ValueError("Scale exceeds maximum limit!!")
 
         return int(motor_val)
+    
+    def convert_motor_pos_to_degrees(self, motor_pos):
+        unit_val = 180/2048         # 180 degrees --> 2048 motor val
 
+        return motor_pos*unit_val
+
+    def read_pos(self, dxl_id):
+        # Read present position
+        dxl_present_position, dxl_comm_result, dxl_error = self.packetHandler.read4ByteTxRx(self.portHandler, dxl_id, ADDR_MX_PRESENT_POSITION)
+        self.check_comm_result(dxl_comm_result, dxl_error)
+        print(dxl_present_position)
+        dxl_present_position_degrees = self.convert_motor_pos_to_degrees(dxl_present_position)
+        return dxl_present_position_degrees
+
+    def read_pos2(self, DXL_IDs):
+        groupBulkRead = GroupBulkRead(self.portHandler, self.packetHandler)
+        for id in DXL_IDs:
+            dxl_addparam_result = groupBulkRead.addParam(id, ADDR_MX_PRESENT_POSITION, LEN_MX_PRESENT_POSITION)
+            if dxl_addparam_result != True:
+                print("[ID:%03d] groupBulkRead addparam failed" % id)
+                quit()
+
+        pos = np.zeros((len(DXL_IDs), 1))
+        for i, id in enumerate(DXL_IDs):
+            dxl_present_position = groupBulkRead.getData(id, ADDR_MX_PRESENT_POSITION, LEN_MX_PRESENT_POSITION)
+            dxl_present_position_degrees = self.convert_motor_pos_to_degrees(dxl_present_position)
+            pos[i] = dxl_present_position_degrees
+        return pos
+
+
+    # Write values
     def set_torque(self, dxl_id, val):
         dxl_comm_result, dxl_error = self.packetHandler.write2ByteTxRx(self.portHandler, dxl_id, ADDR_MX_GOAL_TORQUE, val)
         self.check_comm_result(dxl_comm_result, dxl_error)
@@ -105,7 +143,7 @@ class MotorController:
             self.set_torque(6, val)
             time.sleep(dt_pwm)
 
-
+    # Disable (Clean up)
     def disable_torque(self, dxl_id):
         dxl_comm_result, dxl_error = self.packetHandler.write1ByteTxRx(self.portHandler, dxl_id, ADDR_MX_TORQUE_CONTROL_ENABLE, DISABLE)
         self.check_comm_result(dxl_comm_result, dxl_error)
