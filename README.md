@@ -20,7 +20,8 @@ It also replans trajectory at each step making it resistant to disturbances.
 This folder should have robot models defined in URDF
 
 ### Utils
-Here you can add functions to deploy your controller on a real robot. 
+Here you can add functions to deploy your controller on a real robot.
+
 `dynamixel_utils.py` - This file contains functions to deploy controller on robot using dynamixel motors
 
 ## Dependencies
