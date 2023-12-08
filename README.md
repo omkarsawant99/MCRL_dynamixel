@@ -6,6 +6,8 @@ This repository can simulate any controller with any reference trajectory for an
 ## Features
 ### Controllers
 This folder should house controllers that you want to test. Currently, it has a script for impedance controller.
+MPC controller is still in progress.
+
 ### Planners
 This folders should have reference trajectories that you want the robot to follow. Current planners include -
 
@@ -16,6 +18,10 @@ It also replans trajectory at each step making it resistant to disturbances.
 ### Robot Models
 
 This folder should have robot models defined in URDF
+
+### Utils
+Here you can add functions to deploy your controller on a real robot. 
+`dynamixel_utils.py` - This file contains functions to deploy controller on robot using dynamixel motors
 
 ## Dependencies
 The repo has the following dependencies
