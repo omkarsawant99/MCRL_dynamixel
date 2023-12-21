@@ -11,13 +11,19 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     #desired_joint_positions = np.zeros([6,1])
     #desired_joint_velocities = np.zeros([6,1])
 
-    # Parameters for MCRL
+    # Parameters for MCRL and test sim
+    # here we will only use the D controller to inject small joint damping
+    #D = 0.01*np.ones((robot.num_joints))
+    #D_3 = 25
+    #K = 800
+
+    # Parameters for test real time
     # here we will only use the D controller to inject small joint damping
     D = 0.01*np.ones((robot.num_joints))
-    D_3 = 25
-    K = 800
+    D_3 = np.diag([25, 0.01, 5])
+    K = np.diag([800, 1, 80])
 
-    # Parameters for UR16e
+    # Parameters for UR16e sim
     #D = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
     #D_3 = 2500
     #K = 50000
@@ -51,6 +57,6 @@ def controller(robot, planner, t, joint_positions, joint_velocities):
     desired_ee_velocities = desired_ee_velocities.reshape(-1, 1)
 
     # Gravity not included for now
-    desired_joint_torques = J_t @(K*(desired_ee_positions - ee_positions)+(D_3)*(desired_ee_velocities - ee_velocities)) - (np.diag(D) @(joint_velocities))
-
+    desired_joint_torques = J_t @(K@(desired_ee_positions - ee_positions)+(D_3)@(desired_ee_velocities - ee_velocities)) - (np.diag(D) @(joint_velocities)) + G
+    
     return desired_joint_torques

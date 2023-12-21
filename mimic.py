@@ -34,17 +34,4 @@ robot.start_visualizer()
 motor_control = MotorController()
 
 if __name__ == "__main__":
-    T = 1.
-    
-    #X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
-    X_A = np.array([[0],[0],[0]])
-
-    X_B = np.array([[0.1], [-0.1], [0.1]])
-    #X_B = np.array([[-0.4], [0.4], [0.4]])
-    
-    end_effector_goal2 = np.array([[0.3], [0.5],[0.9]])
-
-    robot.show_target(X_B.flatten())
-
     mimic_robot(robot, motor_control)
-    #simulate_robot(robot, planner, controller, disturbance_end_effector=True)

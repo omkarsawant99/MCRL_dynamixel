@@ -61,8 +61,11 @@ class MotorController:
         if not 0 <= abs(val_nm) <= 0.8*max_torque_nm:
             print(val_nm)
             raise ValueError("Torque exceeds maximum limit!!")
+
+        # Adding extra damping
+        D = 0.1
         
-        motor_val = (1023*val_nm)/max_torque_nm
+        motor_val = D*(1023*val_nm)/max_torque_nm
 
         if motor_val < 0:
             motor_val = 1024 + abs(motor_val)
@@ -76,7 +79,7 @@ class MotorController:
     def convert_motor_pos_to_degrees(self, motor_pos):
         unit_val = 180/2048         # 180 degrees --> 2048 motor val
 
-        return motor_pos*unit_val
+        return 180 - motor_pos*unit_val
 
     def read_pos(self, dxl_id):
         # Read present position

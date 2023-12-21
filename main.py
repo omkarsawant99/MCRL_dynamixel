@@ -24,7 +24,7 @@ q_neutral = np.array([0., -1.57, 0., -1.57, 0., 0.])
 # Test manipulator
 test_package_dirs = "./urdf/Test_urdf/"
 test_urdf = test_package_dirs + "manipulator.urdf"
-test_end_effector_name = "link_3_v4_1"
+test_end_effector_name = "end_eff"
 test_pin_robot = pin.RobotWrapper.BuildFromURDF(test_urdf, test_package_dirs)
 
 
@@ -36,17 +36,17 @@ motor_control = MotorController()
 if __name__ == "__main__":
     T = 3.
     
-    #X_A = np.array([[0.0035],[-0.0021001],[0.46995]])
     X_A = np.array([[0],[0],[0]])
 
-    X_B = np.array([[0.1], [-0.1], [0.1]])
-    #X_B = np.array([[-0.4], [0.4], [0.4]])
-    
-    end_effector_goal2 = np.array([[0.3], [0.5],[0.9]])
+    X_B = np.array([[0.0], [0.1], [0.25]])
 
     robot.show_target(X_B.flatten())
 
     planner = TrajectoryPlanner(X_A, X_B, T)
 
-    simulate_robot_real_time(robot, planner, controller, motor_control)
+    # MotorIDs will be different for each robot.
+    # It is a dictionary with motor ids and the max torque of the corresponding motor
+    test_MotorIDs = {1: 8.4, 2: 8.4, 3: 8.4}         # ID : Max torque at 12 V
+
+    simulate_robot_real_time(robot, planner, controller, motor_control, test_MotorIDs)
     #simulate_robot(robot, planner, controller, disturbance_end_effector=True)

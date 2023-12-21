@@ -43,10 +43,18 @@ class RobotEnv:
                               meshcat.geometry.MeshLambertMaterial(
                              color=0xff22dd,
                              reflectivity=0.8))
+        
+        self.viz.viewer['end_eff'].set_object(meshcat.geometry.Sphere(0.01),
+                              meshcat.geometry.MeshLambertMaterial(
+                             color=0x22ff44,
+                             reflectivity=0.8))
 
 
     def show_target(self, pos):
         self.viz.viewer['ball'].set_transform(meshcat.transformations.translation_matrix(pos))
+
+    def show_end_effector(self, end_eff_pos):
+        self.viz.viewer['end_eff'].set_transform(meshcat.transformations.translation_matrix(end_eff_pos))
 
     def show_positions(self, q):
         self.viz.display(q)
@@ -127,7 +135,7 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
     # Initialize plot
     plot = LivePlot(x_label="Time(s)", y_label="Torques", title="Joint Torques over time", num_joints=robot.num_joints)
 
-    while(True):
+    while(t < 1.5):
         # Get end-effector (body jacobian) jacobian
         J_b = robot.get_end_effector_jacobian(q)
         
@@ -166,72 +174,29 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
         t += dt
 
 
-def simulate_robot_real_time_pwm(robot, planner, robot_controller, MotorController):
-    t = 0.
-    dt = 0.001
-    q = np.zeros((6,1))
-    dq = np.zeros((6,1))
-    robot.show_positions(q)
-    MotorIDs = {1: 8.4, 2: 6.0, 6: 8.4}         # ID : Max torque at 12 V
-    t_visual = 0
-    dt_visual = 0.01
-
-    
-    MotorController.enable_torque(6)
-
-    while(t <= 10):
-        start_time = time.time()
-        tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-
-        print("Controller says:", tau[1])
-        val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
-        MotorController.set_torque(6, val)
-        
-        ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
-        dq += dt * ddq.reshape((6,1))
-        q += dt*dq
-
-        if t_visual == 10:
-            robot.show_positions(q)
-            #MotorController.pwm_control(tau[1])
-            time.sleep(dt_visual)
-            t_visual = 0
-        
-        t_visual += 1
-        t += dt
-    
-    for id in MotorIDs:
-        MotorController.disable_torque(id)
-
-    MotorController.close_port()
-
-def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
+def simulate_robot_real_time(robot, planner, robot_controller, MotorController, MotorIDs):
     t = 0.
     dt = 0.001
     q = np.zeros((robot.num_joints,1))
     dq = np.zeros((robot.num_joints,1))
     robot.show_positions(q)
-    MotorIDs = {1: 8.4, 2: 8.4, 3: 8.4}         # ID : Max torque at 12 V
     t_visual = 0
     dt_visual = 0.01
 
     for id in MotorIDs:
         MotorController.enable_torque(id)
 
-    while(t <= 2):
+    while(t <= 1):
         start_time = time.time()
         tau = robot_controller(robot, planner, t, q.reshape((-1,1)), dq.reshape((-1,1)))
         #print("Controller says:", tau)
         #print("---------------------")
 
-        ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
-        dq += dt * ddq.reshape((-1,1))
-        q += dt*dq
         if t_visual == 10:
             robot.show_positions(q)
             time.sleep(dt_visual)
             for id, tu in zip(MotorIDs, tau):
-                val = MotorController.convert_nm_to_motor_val(-tu, MotorIDs[id])
+                val = MotorController.convert_nm_to_motor_val(-tu.item(), MotorIDs[id])
                 print(val)
                 MotorController.set_torque(id, val)
             print("---------------")
@@ -258,19 +223,13 @@ def mimic_robot(robot, MotorController):
         MotorController.enable_torque(id)
 
     while(t <= 5):
-        #print("Controller says:", tau)
-        #print("---------------------")
-
         if t_visual == 10:
             for i, id in enumerate(MotorIDs):
                 val = MotorController.read_pos(id)
                 q[i] = val
                 time.sleep(0.001)
-            print(q)
             robot.show_positions(q*np.pi/180)
             time.sleep(dt_visual)
-
-            print("---------------")
             t_visual = 0
         t_visual += 1
         t += dt
