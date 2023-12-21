@@ -1,9 +1,9 @@
-import pinocchio as pin
-import meshcat
 import numpy as np
 import time
 import sys
 import matplotlib.pyplot as plt
+import pinocchio as pin
+import meshcat
 
 from pinocchio.visualize import MeshcatVisualizer
 
@@ -15,8 +15,9 @@ class RobotEnv:
         self.end_effector_name = end_effector_name
 
         # Constants to make things easier
-        self.num_joints = 6
-        self.zeros_nx1 = np.zeros((num_joints, 1))
+        self.num_joints = pin_robot.model.nq
+        self.zeros_nx1 = np.zeros((pin_robot.model.nq, 1))
+        print(self.num_joints)
 
     def start_visualizer(self):
         try:
@@ -42,10 +43,18 @@ class RobotEnv:
                               meshcat.geometry.MeshLambertMaterial(
                              color=0xff22dd,
                              reflectivity=0.8))
+        
+        self.viz.viewer['end_eff'].set_object(meshcat.geometry.Sphere(0.01),
+                              meshcat.geometry.MeshLambertMaterial(
+                             color=0x22ff44,
+                             reflectivity=0.8))
 
 
     def show_target(self, pos):
         self.viz.viewer['ball'].set_transform(meshcat.transformations.translation_matrix(pos))
+
+    def show_end_effector(self, end_eff_pos):
+        self.viz.viewer['end_eff'].set_transform(meshcat.transformations.translation_matrix(end_eff_pos))
 
     def show_positions(self, q):
         self.viz.display(q)
@@ -103,7 +112,7 @@ class RobotEnv:
         for i in range(self.num_joints):
             ddq = self.zeros_nx1
             ddq[i] = 1
-            M[:, i] = pin.pinocchio_pywrap.rnea(self.model, self.data, q, self.zeros_nx1, ddq).reshape(-1)
+            M[:, i] = pin.pinocchio_pywrap.rnea(self.model, self.data, q, self.zeros_nx1, ddq).reshape(-1) - self.get_gravity(q)
         return M
 
 
@@ -116,45 +125,46 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
     # Define constants
     t = 0.
     dt = 0.001
-    q = np.zeros((6,1))
-    dq = np.zeros((6,1))
+    q = np.zeros((robot.num_joints,1))
+    dq = np.zeros((robot.num_joints,1))
     robot.show_positions(q)
     t_visual = 0
     dt_visual = 0.01
     disturbance_active = False
-    disturbance_force = np.zeros((6,1))
+    disturbance_force = np.zeros((6, 1))
 
     # Initialize plot
-    plot = LivePlot(x_label="Time(s)", y_label="Torques", title="Joint Torques over time")
+    plot = LivePlot(x_label="Time(s)", y_label="Torques", title="Joint Torques over time", num_joints=robot.num_joints)
 
-    while(True):
+    while(t < 1.5):
         # Get end-effector (body jacobian) jacobian
         J_b = robot.get_end_effector_jacobian(q)
         
-        # Activate disturbance at t = 1 second
+        # Retrieve torques
+        tau = robot_controller(robot, planner, t, q.reshape((robot.num_joints, 1)), dq.reshape((robot.num_joints, 1)))
+
+        # Activate disturbance at t seconds
+
         if t > 1.5 and t < 1.7 and not disturbance_active:
             if disturbance_all_joints:
-                disturbance_force = np.random.normal(0, 0.5, (6,1))  # Random values with mean 0 and std dev 0.5
+                disturbance_force = np.random.normal(0, 0.5, (6, 1))            # Random values with mean 0 and std dev 0.5
             if disturbance_end_effector:
                 disturbance_force = np.zeros((6, 1))
-                disturbance_force[4, :] = -0.2      # Force in y-direction of the end-effector frame
-                disturbance_force_joint_space = J_b.T @ disturbance_force       # Converting that disturbance in joint space
+                disturbance_force[4, :] = -5                                  # Force in y-direction of the end-effector frame
             disturbance_active = True
 
-        # Deactivate disturbance at t = 3 seconds
+        # Deactivate disturbance after t seconds
         if t >= 1.7 and disturbance_active:
-            disturbance_force = np.zeros((6,1))
             disturbance_active = False
 
-        tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-
-        if disturbance_active:
-            tau += disturbance_force
+        # Add disturbance
+        disturbance_force_joint_space = J_b.T @ disturbance_force       # Converting that disturbance in joint space
+        tau += disturbance_force_joint_space
         
 
         # Update visualizer
         ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
-        dq += dt * ddq.reshape((6,1))
+        dq += dt * ddq.reshape((robot.num_joints, 1))
         q += dt*dq
         if t_visual == 10:
             robot.show_positions(q)
@@ -165,73 +175,32 @@ def simulate_robot(robot, planner, robot_controller, disturbance_all_joints=Fals
         t += dt
 
 
-def simulate_robot_real_time_pwm(robot, planner, robot_controller, MotorController):
+def simulate_robot_real_time(robot, planner, robot_controller, MotorController, MotorIDs):
     t = 0.
     dt = 0.001
-    q = np.zeros((6,1))
-    dq = np.zeros((6,1))
+    q = np.zeros((robot.num_joints,1))
+    dq = np.zeros((robot.num_joints,1))
     robot.show_positions(q)
-    MotorIDs = {1: 8.4, 2: 6.0, 6: 8.4}         # ID : Max torque at 12 V
-    t_visual = 0
-    dt_visual = 0.01
-
-    
-    MotorController.enable_torque(6)
-
-    while(t <= 10):
-        start_time = time.time()
-        tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-
-        print("Controller says:", tau[1])
-        val = MotorController.convert_nm_to_motor_val(tau[0], 8.4)
-        MotorController.set_torque(6, val)
-        
-        ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
-        dq += dt * ddq.reshape((6,1))
-        q += dt*dq
-
-        if t_visual == 10:
-            robot.show_positions(q)
-            #MotorController.pwm_control(tau[1])
-            time.sleep(dt_visual)
-            t_visual = 0
-        
-        t_visual += 1
-        t += dt
-    
-    for id in MotorIDs:
-        MotorController.disable_torque(id)
-
-    MotorController.close_port()
-
-def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
-    t = 0.
-    dt = 0.001
-    q = np.zeros((6,1))
-    dq = np.zeros((6,1))
-    robot.show_positions(q)
-    MotorIDs = {1: 8.4, 2: 8.4, 3: 6.0}         # ID : Max torque at 12 V
     t_visual = 0
     dt_visual = 0.01
 
     for id in MotorIDs:
         MotorController.enable_torque(id)
 
-    while(t <= 10):
+    while(t <= 1):
         start_time = time.time()
-        tau = robot_controller(robot, planner, t, q.reshape((6,1)), dq.reshape((6,1)))
-        print("Controller says:", tau[1])
+        tau = robot_controller(robot, planner, t, q.reshape((-1,1)), dq.reshape((-1,1)))
+        #print("Controller says:", tau)
+        #print("---------------------")
 
-        ddq = pin.pinocchio_pywrap.aba(robot.model, robot.data, q, dq, tau)
-        dq += dt * ddq.reshape((6,1))
-        q += dt*dq
         if t_visual == 10:
             robot.show_positions(q)
             time.sleep(dt_visual)
             for id, tu in zip(MotorIDs, tau):
-                val = MotorController.convert_nm_to_motor_val(-tu, MotorIDs[id])
+                val = MotorController.convert_nm_to_motor_val(-tu.item(), MotorIDs[id])
                 print(val)
                 MotorController.set_torque(id, val)
+            print("---------------")
             t_visual = 0
         t_visual += 1
         t += dt
@@ -242,22 +211,51 @@ def simulate_robot_real_time(robot, planner, robot_controller, MotorController):
     MotorController.close_port()
 
 
+def mimic_robot(robot, MotorController):
+    t = 0.
+    dt = 0.001
+    q = np.zeros((robot.num_joints,1))
+    robot.show_positions(q)
+    MotorIDs = {1: 8.4, 2: 8.4, 3: 8.4}         # ID : Max torque at 12 V
+    t_visual = 0
+    dt_visual = 0.01
+
+    for id in MotorIDs:
+        MotorController.enable_torque(id)
+
+    while(t <= 5):
+        if t_visual == 10:
+            for i, id in enumerate(MotorIDs):
+                val = MotorController.read_pos(id)
+                q[i] = val
+                time.sleep(0.001)
+            robot.show_positions(q*np.pi/180)
+            time.sleep(dt_visual)
+            t_visual = 0
+        t_visual += 1
+        t += dt
+    
+    for id in MotorIDs:
+        MotorController.disable_torque(id)
+
+    MotorController.close_port()
+
 class LivePlot:
-    def __init__(self, x_label, y_label, title):
+    def __init__(self, x_label, y_label, title, num_joints):
         plt.ion()
         self.fig, self.ax = plt.subplots()
         self.ax.set_xlabel(x_label)
         self.ax.set_ylabel(y_label)
         self.ax.set_title(title)
-        self.lines = [self.ax.plot([], [], label=f'Joint {i+1}')[0] for i in range(6)]
+        self.lines = [self.ax.plot([], [], label=f'Joint {i+1}')[0] for i in range(num_joints)]
         self.ax.legend()
         time.sleep(2)  # Short pause to allow the plot to render
 
     def update_live_plot(self, t, tau):
         # Update live plot
-        for i in range(6):
-            self.lines[i].set_xdata(np.append(self.lines[i].get_xdata(), t))
-            self.lines[i].set_ydata(np.append(self.lines[i].get_ydata(), tau[i, 0]))
+        for i, line in enumerate(self.lines):
+            line.set_xdata(np.append(line.get_xdata(), t))
+            line.set_ydata(np.append(line.get_ydata(), tau[i, 0]))
 
         self.ax.relim()
         self.ax.autoscale_view()
