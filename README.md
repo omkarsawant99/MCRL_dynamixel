@@ -9,6 +9,11 @@ After simulating, you can also deploy the controller directly onto real hardware
 This folder should house controllers that you want to test. Currently, it has a script for impedance controller.
 MPC controller is still in progress.
 
+**Impedance control**
+
+https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/6aaa98d9-bbd5-4455-a796-79a64a000d44
+
+
 ### Planners
 This folders should have reference trajectories that you want the robot to follow. Current planners include -
 
@@ -40,7 +45,9 @@ Meshcat-Python - https://github.com/meshcat-dev/meshcat-python
 The visualization is done using Pinocchio-Meshcat environment. You can also introduce disturbances in the environment. 
 
 ### Disturbance in the end effector frame
-This type of disturbance simulates a linear force applied to the end effector in the local frame. It can be activated by switching `disturbance_end_effector=True`. Below is the video of how the simulation should look like, with disturbance at 1.5 seconds -
+This type of disturbance simulates a linear force applied to the end effector in the local frame. It can be activated by switching `disturbance_end_effector=True`. Below is the video of how the simulation should look like, with disturbance at 
+
+1.5 seconds -
 
 https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/6dd150cd-9d53-4b3d-985b-351f1bf61015
 
@@ -53,4 +60,8 @@ In this case, random disturbances is equally applied to each joint. It can be ac
 ## Real time operation
 The script `mimic.py` is can be used to test the feedback from the motors. The script should work as follows -
 
+https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/dedb12ff-a7e3-4021-8ef2-40ce343250a9
+
 The `main.py` script can be launched with the function `simulate_robot_real_time` to finally deploy the controller on the real robot. Please make sure the parameters of your controller (gain and damping) are set appropriately. The script should work as follows -
+
+https://github.com/omkarsawant99/MCRL_dynamixel/assets/112906388/debcc52c-34cf-4602-add3-29adb60cf6aa
