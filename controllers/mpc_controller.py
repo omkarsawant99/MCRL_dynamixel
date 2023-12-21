@@ -1,5 +1,5 @@
 # Imports
-
+import numpy as np
 
 # Constants
 dt = 0.001

@@ -95,6 +95,7 @@ class RobotEnv:
         T = np.vstack((T, np.array([[0, 0, 0, 1]])))
         return T
 
+    # Numeric values
     def rnea(self, q, dq, ddq):
         return pin.pinocchio_pywrap.rnea(self.model, self.data, q, dq, ddq).reshape(-1, 1)
 
